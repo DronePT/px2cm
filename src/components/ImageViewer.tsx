@@ -162,12 +162,17 @@ function ImageViewer({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Helper function to draw perpendicular endpoint markers
-    const drawEndpointMarker = (point: Point, angle: number, color: string) => {
-      const markerLength = 10;
+    const drawEndpointMarker = (
+      point: Point,
+      angle: number,
+      color: string,
+      lineWidth: number = 3,
+    ) => {
+      const markerLength = 16; // Increased from 10
       const perpAngle = angle + Math.PI / 2;
 
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = lineWidth;
       ctx.beginPath();
       ctx.moveTo(
         point.x - (markerLength / 2) * Math.cos(perpAngle),
@@ -192,16 +197,16 @@ function ImageViewer({
       // Format text
       const text = `${cmDistance.toFixed(2)} cm`;
 
-      // Set text style
-      ctx.font = "14px system-ui, Arial, sans-serif";
+      // Set text style - increased font size
+      ctx.font = "bold 24px system-ui, Arial, sans-serif"; // Increased to 24px
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
       // Draw background rectangle for better readability
       const metrics = ctx.measureText(text);
-      const padding = 4;
+      const padding = 8; // Increased for larger text
       const bgWidth = metrics.width + padding * 2;
-      const bgHeight = 20;
+      const bgHeight = 34; // Increased for larger text
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
       ctx.fillRect(midX - bgWidth / 2, midY - bgHeight / 2, bgWidth, bgHeight);
@@ -214,7 +219,7 @@ function ImageViewer({
     // Draw calibration line first (if exists) in blue
     if (calibrationLine) {
       ctx.strokeStyle = "#4444ff";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 4; // Increased to 4px
       ctx.lineCap = "round";
 
       // Calculate angle for perpendicular markers
@@ -230,17 +235,17 @@ function ImageViewer({
       ctx.stroke();
 
       // Draw start point marker
-      drawEndpointMarker(calibrationLine.start, angle, "#4444ff");
+      drawEndpointMarker(calibrationLine.start, angle, "#4444ff", 4);
 
       // Draw end point marker
-      drawEndpointMarker(calibrationLine.end, angle, "#4444ff");
+      drawEndpointMarker(calibrationLine.end, angle, "#4444ff", 4);
     }
 
     // Draw all saved measurement lines with labels
     measurementLines.forEach((line, index) => {
       const isHovered = hoveredLineIndex === index;
       const color = isHovered ? "#ff8888" : "#ff4444";
-      const lineWidth = isHovered ? 3 : 2;
+      const lineWidth = isHovered ? 5 : 4; // Increased to 4px (5px when hovered)
 
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth;
@@ -259,10 +264,10 @@ function ImageViewer({
       ctx.stroke();
 
       // Draw start point marker
-      drawEndpointMarker(line.start, angle, color);
+      drawEndpointMarker(line.start, angle, color, lineWidth);
 
       // Draw end point marker
-      drawEndpointMarker(line.end, angle, color);
+      drawEndpointMarker(line.end, angle, color, lineWidth);
 
       // Draw label with distance
       drawLineLabel(line, isHovered ? "#ffff00" : "#ffffff");
@@ -271,8 +276,9 @@ function ImageViewer({
     // Draw current measurement line being drawn (if exists)
     if (startPoint && endPoint) {
       const color = isCalibrationMode ? "#4444ff" : "#ff4444";
+      const lineWidth = 4; // Increased to 4px
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = lineWidth;
       ctx.lineCap = "round";
 
       // Calculate angle for perpendicular markers
@@ -288,10 +294,10 @@ function ImageViewer({
       ctx.stroke();
 
       // Draw start point marker
-      drawEndpointMarker(startPoint, angle, color);
+      drawEndpointMarker(startPoint, angle, color, lineWidth);
 
       // Draw end point marker
-      drawEndpointMarker(endPoint, angle, color);
+      drawEndpointMarker(endPoint, angle, color, lineWidth);
 
       // Draw label for current line if not in calibration mode
       if (!isCalibrationMode) {
