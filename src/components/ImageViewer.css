@@ -1,0 +1,329 @@
+.image-viewer {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #242424;
+  overflow: hidden;
+}
+
+.image-viewer.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-message {
+  text-align: center;
+  color: #888;
+}
+
+.empty-message p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.controls {
+  padding: 1.5rem;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.control-group label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.control-group input[type="number"] {
+  width: 120px;
+  padding: 0.5rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #2a2a2a;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.control-group input[type="number"]:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.control-group input[type="number"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calibration-button {
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.calibration-button:hover {
+  background-color: #535bf2;
+}
+
+.calibration-button.active {
+  background-color: #ff6b6b;
+}
+
+.calibration-button.active:hover {
+  background-color: #ff5252;
+}
+
+.measurement-display {
+  padding: 0.5rem 1rem;
+  background-color: #2a2a2a;
+  border-radius: 6px;
+  border: 1px solid #646cff;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.measurement-display strong {
+  color: #646cff;
+  margin-right: 0.5rem;
+}
+
+.instruction {
+  color: #888;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-left: auto;
+}
+
+.canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1a1a1a;
+  padding: 1rem;
+}
+
+.measurement-image {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  object-fit: contain;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.measurement-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.zoom-window {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  border: 3px solid #646cff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background-color: #000;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Custom scrollbar for canvas container */
+.canvas-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.canvas-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.canvas-container::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 5px;
+}
+
+.canvas-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 2rem;
+  min-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal h3 {
+  margin: 0 0 1rem 0;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.modal p {
+  margin: 0 0 1.5rem 0;
+  color: #ccc;
+}
+
+.modal input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #1a1a1a;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal input[type="number"]:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.modal-buttons button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.submit-button {
+  background-color: #646cff;
+  color: white;
+}
+
+.submit-button:hover {
+  background-color: #535bf2;
+}
+
+.cancel-button {
+  background-color: #444;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #555;
+}
+
+@media (prefers-color-scheme: light) {
+  .image-viewer {
+    background-color: #fff;
+  }
+
+  .controls {
+    background-color: #f5f5f5;
+    border-bottom-color: #ddd;
+  }
+
+  .control-group input[type="number"] {
+    border-color: #ccc;
+    background-color: #fff;
+    color: #333;
+  }
+
+  .control-group input[type="number"]:focus {
+    border-color: #646cff;
+  }
+
+  .measurement-display {
+    background-color: #fff;
+    border-color: #646cff;
+    color: #333;
+  }
+
+  .canvas-container {
+    background-color: #f9f9f9;
+  }
+
+  .canvas-container::-webkit-scrollbar-track {
+    background: #f9f9f9;
+  }
+
+  .canvas-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+  }
+
+  .canvas-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+  }
+
+  .modal {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .modal h3 {
+    color: #333;
+  }
+
+  .modal p {
+    color: #666;
+  }
+
+  .modal input[type="number"] {
+    border-color: #ccc;
+    background-color: #fff;
+    color: #333;
+  }
+
+  .modal input[type="number"]:focus {
+    border-color: #646cff;
+  }
+
+  .cancel-button {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+
+  .cancel-button:hover {
+    background-color: #d0d0d0;
+  }
+}
