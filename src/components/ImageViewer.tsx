@@ -187,6 +187,12 @@ function ImageViewer({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Calculate display scale factor (ratio between canvas size and displayed size)
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const displayScale = Math.max(scaleX, scaleY);
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -195,13 +201,13 @@ function ImageViewer({
       point: Point,
       angle: number,
       color: string,
-      lineWidth: number = 3,
+      baseLineWidth: number = 2,
     ) => {
-      const markerLength = 16; // Increased from 10
+      const markerLength = 10 * displayScale; // Scale marker length (reduced from 16)
       const perpAngle = angle + Math.PI / 2;
 
       ctx.strokeStyle = color;
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = baseLineWidth * displayScale; // Scale line width
       ctx.beginPath();
       ctx.moveTo(
         point.x - (markerLength / 2) * Math.cos(perpAngle),
@@ -214,7 +220,7 @@ function ImageViewer({
       ctx.stroke();
     };
 
-    // Helper function to draw text label in the middle of a line
+    // Helper function to draw text label offset to the side of a line
     const drawLineLabel = (line: Line, color: string) => {
       const distance = calculateDistance(line.start, line.end);
       const cmDistance = distance / scale;
@@ -223,32 +229,53 @@ function ImageViewer({
       const midX = (line.start.x + line.end.x) / 2;
       const midY = (line.start.y + line.end.y) / 2;
 
+      // Calculate angle of the line
+      const angle = Math.atan2(
+        line.end.y - line.start.y,
+        line.end.x - line.start.x,
+      );
+
+      // Calculate perpendicular offset (to the side of the line)
+      const offsetDistance = 30 * displayScale; // Scale offset distance (reduced from 40)
+      const perpAngle = angle + Math.PI / 2; // Perpendicular angle
+
+      // Position label to the side of the line
+      const labelX = midX + offsetDistance * Math.cos(perpAngle);
+      const labelY = midY + offsetDistance * Math.sin(perpAngle);
+
       // Format text
       const text = `${cmDistance.toFixed(2)} cm`;
 
-      // Set text style - increased font size
-      ctx.font = "bold 24px system-ui, Arial, sans-serif"; // Increased to 24px
+      // Set text style - scale font size based on display scale
+      const fontSize = 12 * displayScale; // Scale font size (reduced from 16)
+      ctx.font = `bold ${fontSize}px system-ui, Arial, sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
       // Draw background rectangle for better readability
       const metrics = ctx.measureText(text);
-      const padding = 8; // Increased for larger text
+      const padding = 4 * displayScale; // Scale padding (reduced from 6)
       const bgWidth = metrics.width + padding * 2;
-      const bgHeight = 34; // Increased for larger text
+      const bgHeight = 18 * displayScale; // Scale background height (reduced from 24)
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-      ctx.fillRect(midX - bgWidth / 2, midY - bgHeight / 2, bgWidth, bgHeight);
+      ctx.fillRect(
+        labelX - bgWidth / 2,
+        labelY - bgHeight / 2,
+        bgWidth,
+        bgHeight,
+      );
 
       // Draw text
       ctx.fillStyle = color;
-      ctx.fillText(text, midX, midY);
+      ctx.fillText(text, labelX, labelY);
     };
 
     // Draw calibration line first (if exists) in blue
     if (calibrationLine) {
+      const baseLineWidth = 2; // Base line width (will be scaled, reduced from 4)
       ctx.strokeStyle = "#4444ff";
-      ctx.lineWidth = 4; // Increased to 4px
+      ctx.lineWidth = baseLineWidth * displayScale; // Scale line width
       ctx.lineCap = "round";
 
       // Calculate angle for perpendicular markers
@@ -264,20 +291,25 @@ function ImageViewer({
       ctx.stroke();
 
       // Draw start point marker
-      drawEndpointMarker(calibrationLine.start, angle, "#4444ff", 4);
+      drawEndpointMarker(
+        calibrationLine.start,
+        angle,
+        "#4444ff",
+        baseLineWidth,
+      );
 
       // Draw end point marker
-      drawEndpointMarker(calibrationLine.end, angle, "#4444ff", 4);
+      drawEndpointMarker(calibrationLine.end, angle, "#4444ff", baseLineWidth);
     }
 
     // Draw all saved measurement lines with labels
     measurementLines.forEach((line, index) => {
       const isHovered = hoveredLineIndex === index;
       const color = isHovered ? "#ff8888" : "#ff4444";
-      const lineWidth = isHovered ? 5 : 4; // Increased to 4px (5px when hovered)
+      const baseLineWidth = isHovered ? 3 : 2; // Base line width (will be scaled, reduced from 5/4)
 
       ctx.strokeStyle = color;
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = baseLineWidth * displayScale; // Scale line width
       ctx.lineCap = "round";
 
       // Calculate angle for perpendicular markers
@@ -293,10 +325,10 @@ function ImageViewer({
       ctx.stroke();
 
       // Draw start point marker
-      drawEndpointMarker(line.start, angle, color, lineWidth);
+      drawEndpointMarker(line.start, angle, color, baseLineWidth);
 
       // Draw end point marker
-      drawEndpointMarker(line.end, angle, color, lineWidth);
+      drawEndpointMarker(line.end, angle, color, baseLineWidth);
 
       // Draw label with distance
       drawLineLabel(line, isHovered ? "#ffff00" : "#ffffff");
@@ -305,9 +337,9 @@ function ImageViewer({
     // Draw current measurement line being drawn (if exists)
     if (startPoint && endPoint) {
       const color = isCalibrationMode ? "#4444ff" : "#ff4444";
-      const lineWidth = 4; // Increased to 4px
+      const baseLineWidth = 2; // Base line width (will be scaled, reduced from 4)
       ctx.strokeStyle = color;
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = baseLineWidth * displayScale; // Scale line width
       ctx.lineCap = "round";
 
       // Calculate angle for perpendicular markers
@@ -323,10 +355,10 @@ function ImageViewer({
       ctx.stroke();
 
       // Draw start point marker
-      drawEndpointMarker(startPoint, angle, color, lineWidth);
+      drawEndpointMarker(startPoint, angle, color, baseLineWidth);
 
       // Draw end point marker
-      drawEndpointMarker(endPoint, angle, color, lineWidth);
+      drawEndpointMarker(endPoint, angle, color, baseLineWidth);
 
       // Draw label for current line if not in calibration mode
       if (!isCalibrationMode) {
