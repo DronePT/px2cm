@@ -112,17 +112,45 @@ function ImageViewer({
   const [tempCalibrationDistance, setTempCalibrationDistance] = useState("");
   const [hoveredLineIndex, setHoveredLineIndex] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState<Point | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Get scale, calibration line, and measurements from the selected image, or use defaults
   const scale = selectedImage?.scale || 96;
   const calibrationLine = selectedImage?.calibrationLine || null;
   const measurementLines = selectedImage?.measurementLines || [];
 
-  // Shift key detection
+  // Shift key detection, 'C' key for calibration toggle, and 'X' key for undo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Shift") {
         setIsShiftPressed(true);
+      }
+      if (e.key === "c" || e.key === "C") {
+        // Don't toggle if user is typing in an input field
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        ) {
+          return;
+        }
+        setIsCalibrationMode((prev) => !prev);
+        // Clear current drawing when toggling
+        setStartPoint(null);
+        setEndPoint(null);
+      }
+      if (e.key === "x" || e.key === "X") {
+        // Don't undo if user is typing in an input field
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        ) {
+          return;
+        }
+        // Remove last measurement line (LIFO - Last In, First Out)
+        if (selectedImage && measurementLines.length > 0) {
+          const updatedLines = measurementLines.slice(0, -1);
+          onMeasurementsUpdate(selectedImage.id, updatedLines);
+        }
       }
     };
 
@@ -139,7 +167,7 @@ function ImageViewer({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [selectedImage, measurementLines, onMeasurementsUpdate]);
 
   // Reset drawing state when image changes
   useEffect(() => {
@@ -147,6 +175,7 @@ function ImageViewer({
     setEndPoint(null);
     setIsDrawing(false);
     setIsCalibrationMode(false);
+    setImageLoaded(false);
   }, [selectedImage?.id]);
 
   // Draw the measurement line on canvas
@@ -313,6 +342,7 @@ function ImageViewer({
     measurementLines,
     isCalibrationMode,
     hoveredLineIndex,
+    imageLoaded,
   ]);
 
   // Render zoom window
@@ -404,6 +434,7 @@ function ImageViewer({
 
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
+    setImageLoaded(true);
   };
 
   const getCanvasCoordinates = (
@@ -569,8 +600,8 @@ function ImageViewer({
         </div>
         <div className="instruction">
           {isCalibrationMode
-            ? "Draw a line of known length, then enter its measurement"
-            : "Click and drag to measure • Click on a line to delete it"}
+            ? "Draw a line of known length, then enter its measurement • Press C to cancel"
+            : "Click and drag to measure • Click on a line to delete it • Press C to calibrate • Press X to undo"}
           {isShiftPressed && " • Shift: Straight lines"}
         </div>
       </div>
